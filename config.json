@@ -1,9 +1,0 @@
-{
-  "mongoUrl": "mongodb://localhost:27017/gtfs",
-  "agencies": [
-    {
-      "agency_key": "mdc-gtfs",
-      "url": "http://www.miamidade.gov/transit/googletransit/current/google_transit.zip"
-    }
-  ]
-}
