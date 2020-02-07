@@ -27,3 +27,8 @@ For an example of a blueprint, look at `controllers/routes.py`.
 Each blueprint should represent a item in the gtfs feed (e.g. shapes, routes, trips, etc.)
 
 To make it easier to pull specific information out of these items, we're going to use dictionaries to make it easy and intuitive to get any specific values we need using key:value syntax. To see the shape of gtfs data items, use the swagger [documentation](https://mdc-gtfs.herokuapp.com/api-docs/#/)
+
+## TODO:
+- Write out schemas for the gtfs shapes
+- Organize what the endpoints are going to be (in order to remain within the standard)
+- Document endpoints using postman and add collaborators
