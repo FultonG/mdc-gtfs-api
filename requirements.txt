@@ -1,4 +1,5 @@
 flask
+bson
 pymongo
 flask-pymongo
 gunicorn

@@ -1,11 +1,6 @@
 from flask import Flask
 from controllers.routes import routes
-
-# start flask instance
-app = Flask(__name__)
-
-# enable flask debug mode for stack tracing
-app.config['DEBUG'] = True
+from controllers.instances import app, mongo
 
 # register the blueprints
 app.register_blueprint(routes)
