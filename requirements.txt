@@ -1,5 +1,5 @@
 flask
-bson
+dnspython
 pymongo
 flask-pymongo
 gunicorn
