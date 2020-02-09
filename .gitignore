@@ -1,4 +1,5 @@
 node_modules/
+Procfile
 SECRET_KEYS.json
 __pycache__
 .env

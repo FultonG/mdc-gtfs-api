@@ -1,14 +1,21 @@
+import os
 import json
+import os.path
 from flask import Flask
 from flask_pymongo import PyMongo
 
 # start flask instance
 app = Flask(__name__)
 
-# read mongo uri from secret file
+# set filename for the environments path
 SECRETS_pathname = 'SECRET_KEYS.json'
-with open(SECRETS_pathname) as f:
-    MONGO_URI = json.load(f)['MONGO_URI']
+
+# check if file exists, if not, assume it's in a config var
+if os.path.isfile(SECRETS_pathname):
+    with open(SECRETS_pathname) as f:
+        MONGO_URI = json.load(f)['MONGO_URI']
+else:
+    MONGO_URI = os.environ['MONGO_URI']
 
 # set flask instance config variable for the database
 app.config['MONGO_URI'] = MONGO_URI
