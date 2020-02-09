@@ -1,5 +1,9 @@
-# Flask API Structure
+# GTFS API
 
+## Resources
+Postman docs can be found [here](https://documenter.getpostman.com/view/9923648/SWTHbaUZ?version=latest)
+
+Base heroku endpoint is [here](https://gtfs-mdc.herokuapp.com/)
 ### Initial Setup
 to install all of the dependencies run:
 
