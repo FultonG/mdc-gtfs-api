@@ -38,7 +38,7 @@ def find_trips_by_id():
         return make_response({'Error': 'Missing or invalid input'}, 400)
     # query the trips collection and return whatever we find
     try:
-        result = collection.find({'route_id': route_id}, {'_id': 0})
+        result = collection.find({'route_id': route_id}, {'_id': 0, 'route_id':1, 'trip_id':1, 'shape_id':1})
     except:
         # return none and 500 if any errors happen
         return make_response({}, 500)

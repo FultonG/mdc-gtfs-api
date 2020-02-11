@@ -36,7 +36,7 @@ def find_shape_by_id():
         return make_response({'Error': 'Missing or invalid input'}, 400)
     # query the shapes collection and return whatever we find
     try:
-        result = collection.find({'shape_id': shape_id}, {'_id': 0})
+        result = collection.find({'shape_id': shape_id}, {'_id': 0, 'shape_pt_lat':1, 'shape_pt_lon':1, 'shape_id':1})
     except:
         # return none and 500 if any errors happen
         return make_response({}, 500)
