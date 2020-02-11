@@ -1,6 +1,7 @@
 from flask import Flask
 from controllers.routes import routes
 from controllers.trips import trips
+from controllers.stoptimes import stoptimes
 from controllers.shapes import shapes
 from controllers.instances import app, mongo
 
@@ -8,6 +9,7 @@ from controllers.instances import app, mongo
 app.register_blueprint(routes)
 app.register_blueprint(shapes)
 app.register_blueprint(trips)
+app.register_blueprint(stoptimes)
 
 # default index route returns 200
 @app.route('/', methods=['GET'])
