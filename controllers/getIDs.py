@@ -29,7 +29,7 @@ def get_all_ids():
 		trip['shape_id'] = i['shape_id']
 		trip['shape_info'] = []
 		for j in find_shape_by_id(i['shape_id']):
-			trip['shape_info'].append(j['loc'])
+			trip['shape_info'].append([j['loc'][1], j['loc'][0]])
 		trip['timeInfo'] = find_stoptimes_by_id(i['trip_id'])
 		result.append(trip)
 
