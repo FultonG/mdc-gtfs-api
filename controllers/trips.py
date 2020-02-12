@@ -29,13 +29,16 @@ def show_all_trips():
     return make_response(dumps(result), 200)
 
 @trips.route('/trips/find', methods=['GET'])
-def find_trips_by_id():
+def find_trips_by_id(routeID=None):
     # parse id param from call
-    try:
-        route_id = request.args.get('id')
-    except:
-        # return error message and 400 if it throws an exeption
-        return make_response({'Error': 'Missing or invalid input'}, 400)
+    if routeID is None:
+        try:
+            route_id = request.args.get('id')
+        except:
+            # return error message and 400 if it throws an exeption
+            return make_response({'Error': 'Missing or invalid input'}, 400)
+    else:
+        route_id = routeID
     # query the trips collection and return whatever we find
     try:
         result = collection.find({'route_id': route_id}, {'_id': 0, 'route_id':1, 'trip_id':1, 'shape_id':1})
@@ -43,4 +46,7 @@ def find_trips_by_id():
         # return none and 500 if any errors happen
         return make_response({}, 500)
     # return json results and send 200
-    return make_response(dumps(result), 200)
+    if routeID is None:
+        return make_response(dumps(result), 200)
+    else:
+        return result

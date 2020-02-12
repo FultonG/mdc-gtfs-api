@@ -27,18 +27,27 @@ def show_all_shapes():
     return make_response(dumps(result), 200)
 
 @shapes.route('/shapes/find', methods=['GET'])
-def find_shape_by_id():
+def find_shape_by_id(shapeID=None):
     # parse id param from call
-    try:
-        shape_id = request.args.get('id')
-    except:
-        # return error message and 400 if it throws an exeption
-        return make_response({'Error': 'Missing or invalid input'}, 400)
+    if shapeID is None:
+        try:
+            shape_id = request.args.get('id')
+        except:
+            # return error message and 400 if it throws an exeption
+            return make_response({'Error': 'Missing or invalid input'}, 400)
+    else:
+        shape_id = shapeID
     # query the shapes collection and return whatever we find
     try:
-        result = collection.find({'shape_id': shape_id}, {'_id': 0, 'shape_pt_lat':1, 'shape_pt_lon':1, 'shape_id':1})
+        if shapeID is None:
+            result = collection.find({'shape_id': shape_id}, {'_id': 0, 'shape_pt_lat':1, 'shape_pt_lon':1, 'shape_id':1})
+        else:
+            result = collection.find({'shape_id':shape_id}, {'_id':0, 'loc':1})
     except:
         # return none and 500 if any errors happen
         return make_response({}, 500)
     # return json results and send 200
-    return make_response(dumps(result), 200)
+    if shapeID is None:
+        return make_response(dumps(result), 200)
+    else:
+        return result
