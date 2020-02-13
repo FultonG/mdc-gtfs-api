@@ -1,10 +1,14 @@
 from flask import Flask
+from flask_cors import CORS
 from controllers.routes import routes
 from controllers.trips import trips
 from controllers.stoptimes import stoptimes
 from controllers.shapes import shapes
 from controllers.getIDs import getIDs
 from controllers.instances import app, mongo
+
+# enable cors for the flask instance
+CORS(app)
 
 # register the blueprints
 app.register_blueprint(routes)
