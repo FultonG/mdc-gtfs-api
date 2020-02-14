@@ -4,6 +4,7 @@ from .instances import mongo
 from controllers.shapes import find_shape_by_id
 from controllers.stoptimes import find_stoptimes_by_id
 from controllers.trips import find_trips_by_id
+from controllers.routes import find_route_by_id
 
 getIDs = Blueprint('getIDs', __name__)
 
@@ -25,6 +26,9 @@ def get_all_ids():
 		#the ditionary should have trip_id, route_id, and shape_id
 		trip = {}
 		trip['route_id'] = i['route_id']
+		for routeDoc in find_route_by_id(i['route_id']):
+			trip['route_long_name'] = routeDoc['route_long_name']
+			trip['route_color'] = routeDoc['route_color']
 		trip['trip_id'] = i['trip_id']
 		trip['shape_id'] = i['shape_id']
 		trip['shape_info'] = []
