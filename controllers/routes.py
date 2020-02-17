@@ -23,19 +23,28 @@ def show_all_routes():
     return make_response(dumps(result), 200)
 
 @routes.route('/routes/find', methods=['GET'])
-def find_route_by_id():
+def find_route_by_id(routeID=None):
     # parse id param from call
     try:
-        route_id = request.args.get('id')
+        if routeID is None:
+            route_id = request.args.get('id')
+        else:
+            route_id = routeID
     except:
         # return error message and 400 if it throws an exeption
         return make_response({'Error': 'Missing or invalid input'}, 400)
     # query the routes collection and return whatever we find
     try:
-        result = collection.find({'route_id': route_id},
+        if routeID is None:
+            result = collection.find({'route_id': route_id},
                 {'_id': 0, 'route_id': 1, 'route_short_name': 1, 'route_long_name': 1, 'route_color': 1})
+        else:
+            result = collection.find({'route_id': route_id}, {'_id':0, 'route_long_name':1, 'route_color':1})
     except:
         # return none and 500 if any errors happen
         return make_response({}, 500)
     # return json results and send 200
-    return make_response(dumps(result), 200)
+    if routeID is None: 
+        return make_response(dumps(result), 200)
+    else:
+        return result
