@@ -1,6 +1,9 @@
 from bson.json_util import dumps
 from flask import Blueprint, make_response, request
 from .instances import mongo
+import requests
+import json
+import polyline
 
 shapes = Blueprint('shapes', __name__)
 
@@ -27,27 +30,26 @@ def show_all_shapes():
     return make_response(dumps(result), 200)
 
 @shapes.route('/shapes/find', methods=['GET'])
-def find_shape_by_id(shapeID=None):
+def find_shape_by_id():
     # parse id param from call
-    if shapeID is None:
-        try:
-            shape_id = request.args.get('id')
-        except:
-            # return error message and 400 if it throws an exeption
-            return make_response({'Error': 'Missing or invalid input'}, 400)
-    else:
-        shape_id = shapeID
-    # query the shapes collection and return whatever we find
     try:
-        if shapeID is None:
-            result = collection.find({'shape_id': shape_id}, {'_id': 0, 'shape_pt_lat':1, 'shape_pt_lon':1, 'shape_id':1})
-        else:
-            result = collection.find({'shape_id':shape_id}, {'_id':0, 'loc':1})
+        route_id = request.args.get('id')
+        token_id = request.args.get('token')
     except:
-        # return none and 500 if any errors happen
-        return make_response({}, 500)
-    # return json results and send 200
-    if shapeID is None:
-        return make_response(dumps(result), 200)
-    else:
-        return result
+        # return error message and 400 if it throws an exeption
+        return make_response({'Error':'Missing or invalid input'}, 400)
+    # call enpoint with token and route
+    try:
+        result = requests.get('https://rest.tsoapi.com/routes/getRouteFromToken?tkn={}&routeId={}'.format(token_id, route_id), verify=False)
+        # turn result into json
+        result_json = result.json()
+        data = json.loads(result_json)
+        # only usefull info in our result is the 'routes' key with value of [{}]
+        route_data = data['routes'][0]
+        # store the info we want to return in seperate variable
+        data_info = {'Names':route_data['Name1'], 'RouteId':route_data['RouteId'], 'LineColor':route_data['LineColor'], 'RoutePath':polyline.decode(route_data['RoutePath'])}
+    # raise error if exception
+    except:
+        return make_response({}, 200)
+    # return data_info
+    return make_response(dumps(data_info), 200)

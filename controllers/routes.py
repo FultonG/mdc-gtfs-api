@@ -1,6 +1,8 @@
 from bson.json_util import dumps
 from flask import Blueprint, make_response, request
 from .instances import mongo
+import requests
+import json
 
 # create the blueprint (controller) for the routes
 routes = Blueprint('routes', __name__)
@@ -14,37 +16,37 @@ collection = mongo.db.routes
 def show_all_routes():
     try:
         # equivalent to db.routes.find({})
-        result = collection.find({}, {'_id':0})
+        token_id = request.args.get('token')
     except Exception as e:
         print(e)
         # if there's an error, return a 500 and no data
         return make_response({}, 500)
+
+    try:
+        result = requests.get('https://rest.tsoapi.com/routes/getRouteFromToken?tkn={}&routeId=-1'.format(token_id), verify=False)
+        result_json = result.json()
+        data = json.loads(result_json)
+    except:
+        return make_response({}, 500)
     # if nothing goes wrong return all of the data and return a 200
-    return make_response(dumps(result), 200)
+    return make_response(data, 200)
 
 @routes.route('/routes/find', methods=['GET'])
-def find_route_by_id(routeID=None):
+def find_route_by_id():
     # parse id param from call
     try:
-        if routeID is None:
-            route_id = request.args.get('id')
-        else:
-            route_id = routeID
+        route_id = request.args.get('id')
+        token_id = request.args.get('token')
     except:
         # return error message and 400 if it throws an exeption
         return make_response({'Error': 'Missing or invalid input'}, 400)
     # query the routes collection and return whatever we find
     try:
-        if routeID is None:
-            result = collection.find({'route_id': route_id},
-                {'_id': 0, 'route_id': 1, 'route_short_name': 1, 'route_long_name': 1, 'route_color': 1})
-        else:
-            result = collection.find({'route_id': route_id}, {'_id':0, 'route_long_name':1, 'route_color':1})
+        result = requests.get('https://rest.tsoapi.com/routes/getRouteFromToken?tkn={}&routeId={}'.format(token_id, route_id), verify=False)
+        result_json = result.json()
+        data = json.loads(result_json)
     except:
         # return none and 500 if any errors happen
         return make_response({}, 500)
     # return json results and send 200
-    if routeID is None: 
-        return make_response(dumps(result), 200)
-    else:
-        return result
+    return make_response(data, 200)
