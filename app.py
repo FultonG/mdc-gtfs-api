@@ -3,14 +3,14 @@ from flask_cors import CORS
 from controllers.routes import routes
 from controllers.shapes import shapes
 from controllers.instances import app, mongo
-
+from controllers.stops import stops
 # enable cors for the flask instance
 CORS(app)
 
 # register the blueprints
 app.register_blueprint(routes)
 app.register_blueprint(shapes)
-
+app.register_blueprint(stops)
 # default index route returns 200
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET'])
