@@ -10,7 +10,7 @@ tokens = Blueprint('tokens', __name__)
 @tokens.route('/tokens', methods=['GET'])
 def send_tokens():
     # parse id param from call
-   tokens = {
+    tokens = {
             'Hollywood':'C6B3CFCC-C1B2-47B4-9FD3-EEFB2A46E3C6',
             'Doral':'582EB861-9C13-4C89-B491-15F0AFBF9F47',
             'Miami Beach':'825894C5-2B5F-402D-A055-88F2297AF99A',
