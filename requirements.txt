@@ -1,4 +1,6 @@
 flask
+polyline
+requests
 bcrypt
 flask-cors
 dnspython
