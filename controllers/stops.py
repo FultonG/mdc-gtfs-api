@@ -28,8 +28,8 @@ def find_stops_by_id():
         all_stops = []
         # loop over every dictionary in stops_data to get lat and lon
         for stop_info in stops_data:
-            lat = float(stop_info['Latitude'])
-            lon = float(stop_info['Longitude'])
+            lat = int(stop_info['Latitude'])
+            lon = int(stop_info['Longitude'])
             all_stops.append([lat, lon])
     # raise error if exception
     except Exception as e:
