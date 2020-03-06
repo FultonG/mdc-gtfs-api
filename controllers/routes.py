@@ -11,7 +11,6 @@ routes = Blueprint('routes', __name__)
 collection = mongo.db.routes
 
 # create GET endpoint to return all routes
-# note: instead of calling @app, we call the blueprint (@routes)
 @routes.route('/routes/find/all', methods=['GET'])
 def show_all_routes():
     try:
