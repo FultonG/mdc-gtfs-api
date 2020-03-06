@@ -26,10 +26,19 @@ def show_all_routes():
         result = requests.get('https://rest.tsoapi.com/routes/getRouteFromToken?tkn={}&routeId=-1'.format(token_id), verify=False)
         result_json = result.json()
         data = json.loads(result_json)
+        data_keys = ['routes', 'points', 'stops']
+        for key in data_keys:
+            if not data[key]:
+                del data[key]
+        if not data:
+            data = None
     except:
         return make_response({}, 500)
     # if nothing goes wrong return all of the data and return a 200
-    return make_response(data, 200)
+    if data:
+        return make_response(data, 200)
+    else:
+        return make_response('', 204)
 
 @routes.route('/routes/find', methods=['GET'])
 def find_route_by_id():
