@@ -7,6 +7,12 @@ import polyline
 
 stops = Blueprint('stops', __name__)
 
+def schema_validator(route):
+    schema = {'route':{'type':'string','maxlength':10}}
+    v = Validator(schema)
+    input_info = {'route':route}
+    return v.validate(input_info)
+
 # endpoint to get all shapes
 @stops.route('/stops/find', methods=['GET'])
 def find_stops_by_id():

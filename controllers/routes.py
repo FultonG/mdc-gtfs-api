@@ -3,12 +3,21 @@ from flask import Blueprint, make_response, request
 from .instances import mongo
 import requests
 import json
-
+from cerberus import Validator
 # create the blueprint (controller) for the routes
 routes = Blueprint('routes', __name__)
 
-# set the collection for the blueprint
-collection = mongo.db.routes
+
+def schema_validator(token=None, route=None):
+    schema = {'token':{'type':'string', 'maxlength':36}, 'route':{'type':'string','maxlength':10}}
+    v = Validator(schema)
+    input_info = {}
+    for info in [('token', token), ('route', route)]:
+        info_key, info_value = info
+        if info_value:
+            input_info[info_key] = info_value
+    return v.validate(input_info)
+
 
 # create GET endpoint to return all routes
 # note: instead of calling @app, we call the blueprint (@routes)
@@ -17,6 +26,7 @@ def show_all_routes():
     try:
         # equivalent to db.routes.find({})
         token_id = request.args.get('token')
+        assert(schema_validator(token_id))
     except Exception as e:
         print(e)
         # if there's an error, return a 500 and no data
@@ -46,6 +56,7 @@ def find_route_by_id():
     try:
         route_id = request.args.get('id')
         token_id = request.args.get('token')
+        assert(schema_validator(token_id, route_id))
     except:
         # return error message and 400 if it throws an exeption
         return make_response({'Error': 'Missing or invalid input'}, 400)
