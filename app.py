@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from controllers.routes import routes
+from controllers.users import users
 from controllers.shapes import shapes
 from controllers.instances import app, mongo
 from controllers.stops import stops
@@ -11,6 +12,7 @@ CORS(app)
 
 # register the blueprints
 app.register_blueprint(routes)
+app.register_blueprint(users)
 app.register_blueprint(shapes)
 app.register_blueprint(stops)
 app.register_blueprint(tokens)
