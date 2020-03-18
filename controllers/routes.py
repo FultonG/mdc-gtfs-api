@@ -1,5 +1,6 @@
 from bson.json_util import dumps
 from flask import Blueprint, make_response, request
+import polyline
 import requests
 import json
 from cerberus import Validator
@@ -41,9 +42,12 @@ def show_all_routes():
         if not data:
             data = None
     except:
-        return make_response({}, 500)
+        return make_response({'error': 'Server error'}, 500)
     # if nothing goes wrong return all of the data and return a 200
     if data:
+        # decode polyline info in routes
+        for route in data['routes']:
+            route['RoutePath'] = polyline.decode(route['RoutePath'])
         return make_response(data, 200)
     else:
         return make_response('', 204)

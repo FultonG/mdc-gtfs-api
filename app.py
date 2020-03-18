@@ -27,4 +27,4 @@ def index():
 
 if __name__ == '__main__':
     # run flask app on host:port
-    app.run(host='localhost', port=3000)
+    app.run(host='localhost', port=8000)
