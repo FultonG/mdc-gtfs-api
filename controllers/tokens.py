@@ -1,6 +1,5 @@
 from bson.json_util import dumps
 from flask import Blueprint, make_response, request
-from .instances import mongo
 import requests
 import json
 
