@@ -11,13 +11,13 @@ col = mongo.db.users
 # init pymongo client to users collection
 def schema_validator(username, password, email=None):
     if email is not None:
-        schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 255},
-                'password':{'type':'string','minlength':8, 'maxlength': 255},
+        schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 100},
+                'password':{'type':'string','minlength':8, 'maxlength': 100},
                 'email': {'type': 'string'}}
         input_info = {'username': username, 'password': password, 'email': email}
     else:
-        schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 255},
-                'password':{'type':'string','minlength':8, 'maxlength': 255}}
+        schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 100},
+                'password':{'type':'string','minlength':8, 'maxlength': 100}}
         input_info = {'username': username, 'password': password}
 
     v = Validator(schema)
