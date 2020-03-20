@@ -11,13 +11,13 @@ col = mongo.db.users
 # init pymongo client to users collection
 def schema_validator(username, password, email=None):
     if email is not None:
-        schema = {'username':{'type':'string', 'minlength':6},
-                'password':{'type':'string','minlength':8},
+        schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 255},
+                'password':{'type':'string','minlength':8, 'maxlength': 255},
                 'email': {'type': 'string'}}
         input_info = {'username': username, 'password': password, 'email': email}
     else:
-        schema = {'username':{'type':'string', 'minlength':6},
-                'password':{'type':'string','minlength':8}}
+        schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 255},
+                'password':{'type':'string','minlength':8, 'maxlength': 255}}
         input_info = {'username': username, 'password': password}
 
     v = Validator(schema)
@@ -50,7 +50,7 @@ def register_user():
         print(e)
         return make_response({'Error': 'Internal server error, please try again in a few minutes'}, 500)
     if duplicate:
-        return make_response({'Error': 'User already exists'}, 400)
+        return make_response({'Error': 'User already exists'}, 406)
     else:
         # make user and insert to db
         user = create_user(username, password, email)
