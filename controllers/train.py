@@ -66,10 +66,8 @@ def find_train():
         result_dump = json.dumps(result_text)
         data = json.loads(result_dump)
         data_json = result.json()
-        train_data = []
-        for trip in data_json:
-            trip_clean = trip_info(trip)
-            train_data.append(trip_clean)
+        train_data = list(map(trip_info, data_json))
+        assert(train_data)
 
     except:
         return make_response({'Error':'Could not fetch data'}, 500)
