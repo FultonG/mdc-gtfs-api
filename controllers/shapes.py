@@ -35,6 +35,6 @@ def find_shape_by_id():
         data_info = {'Names':route_data['Name1'], 'RouteId':route_data['RouteId'], 'LineColor':route_data['LineColor'], 'RoutePath':polyline.decode(route_data['RoutePath'])}
     # raise error if exception
     except:
-        return make_response({}, 500)
+        return make_response({}, 404)
     # return data_info
     return make_response(dumps(data_info), 200)

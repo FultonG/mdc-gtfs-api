@@ -64,7 +64,7 @@ def find_route_by_id():
         return make_response({'Error': 'Missing or invalid input'}, 400)
     # query the routes collection and return whatever we find
     try:
-        result = requests.get('https://rest.tsoapi.com/routes/getRouteFromToken?tkn={}&routeId={}'.format(token_id, route_id), verify=False)
+        result = requests.get(f'https://rest.tsoapi.com/routes/getRouteFromToken?tkn={token_id}&routeId={route_id}', verify=False)
         result_json = result.json()
         data = json.loads(result_json)
     except:
