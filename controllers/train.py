@@ -29,37 +29,34 @@ def trip_info(trip):
     # variable to store the info we actually want
     trip_data = {}
     # array with the keys we want
-    train_keys = ['origin','destination','train','consistNumber','estimatedDeparture',
-               'scheduledDeparture','actualDeparture','scheduledArrival','estimatedArrival',
-               'actualArrival','actualArrivalPlatform','actualDeparturePlatform',
-               'arrivalPlatform','arrivalStatus','departurePlatform','legs']
-    # array with the keys we want from 'leg'
-    leg_keys = ['actualArrival','actualDeparture','estimatedArrival','estimatedDeparture',
-                'arrivalStatus','consistNumber','isCancelled','actualArrivalPlatform',
-                'actualDeparturePlatform','arrivalPlatform','departurePlatform','legStatus',
-                'origin','scheduledArrival','scheduledArrivalPlatform','scheduledDeparture',
-                'scheduledDeparturePlatform','train']
+    train_keys = ['origin','destination','train','consistNumber','estimatedDeparture','scheduledDeparture','actualDeparture','scheduledArrival','estimatedArrival','actualArrival','actualArrivalPlatform','actualDeparturePlatform','arrivalPlatform','arrivalStatus','departurePlatform','legs']
     for key in train_keys:
-        # check if key is missing
-        try:
-            # get value of the current key
-            trip_value = trip[key]
-            if key == 'legs':
-                # array to hold all 'leg' dictionaries with keys we want
-                leg_data = []
-                for leg in trip_value:
-                    # variable to store the info we want from 'leg'
-                    leg_info = {}
-                    for leg_key in leg_keys:
-                        leg_info[leg_key] = leg[leg_key]
-                    leg_data.append(leg_info)
-                trip_data[key] = leg_data
-                continue
+        # get value of the current key, if key not valid
+        # assign empty string
+        trip_value = trip.get(key, '')
+        if key == 'legs':
+            # get clean leg value
+            leg_data = leg_info(trip_value)
+            trip_data[key] = leg_data
+        else:
             trip_data[key] = trip_value
-        # if key missing assign empty string
-        except:
-            trip_data[key] = ''
     return trip_data
+
+def leg_info(leg_value):
+    leg_data = []
+    # array with the keys we want from 'leg'
+    leg_keys = ['actualArrival','actualDeparture','estimatedArrival','estimatedDeparture','arrivalStatus','consistNumber','isCancelled','actualArrivalPlatform','actualDeparturePlatform','arrivalPlatform','departurePlatform','legStatus','origin','scheduledArrival','scheduledArrivalPlatform','scheduledDeparture','scheduledDeparturePlatform','train']
+    # iterate over each leg
+    for leg in leg_value:
+        leg_info = {}
+        for key in leg_keys:
+            # get value of current key, if key not valid
+            # assign empty string
+            leg_info[key] = leg.get(key, '')
+        # append clean leg dict to array
+        leg_data.append(leg_info)
+    # return array
+    return leg_data
 
 # create GET endpoint to return all routes
 @trains.route('/trains/find', methods=['GET'])
