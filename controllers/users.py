@@ -21,7 +21,8 @@ def schema_validator(username, password, email=None):
         input_info = {'username': username, 'password': password}
 
     v = Validator(schema)
-    return v.validate(input_info)
+    v.validate(input_info)
+    return v.errors
 
 # method that creates a user with given params
 def create_user(username, password, email):
@@ -39,10 +40,11 @@ def register_user():
         password = request.args.get('pwd')
         email = request.args.get('email')
         # validate against schema
-        assert(schema_validator(username, password, email))
+        errors = schema_validator(username, password, email)
+        assert(len(errors) is 0)
     except Exception as e:
         print('exception:', e)
-        return make_response({'Error': 'Missing or invalid information'}, 400)
+        return make_response({'Error': errors}, 400)
     try:
         # check if user exists
         duplicate = (col.find_one({'username' : username}) is not None)
@@ -64,10 +66,11 @@ def login_user():
     try:
         username = request.args.get('user')
         password = request.args.get('pwd')
-        assert(schema_validator(username, password))
+        errors = schema_validator(username, password)
+        assert(len(errors) is 0)
     except Exception as e:
         print('exception:', e)
-        return make_response(jsonify({'Error': 'Missing or invalid information'}), 400)
+        return make_response({'Error': errors}, 400)
     # lookup user in db and compare hashes
     user = col.find_one({'username': username}, {'_id': 0, 'password': 1})
     # return 400 if user doesnt exist
