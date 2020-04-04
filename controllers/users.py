@@ -10,7 +10,7 @@ col = mongo.db.users
 
 # init pymongo client to users collection
 def schema_validator(username, password, email=None):
-    if email is not None:
+    elif email is not None:
         schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 100},
                 'password':{'type':'string','minlength':8, 'maxlength': 100},
                 'email': {'type': 'string'}}
@@ -28,7 +28,9 @@ def schema_validator(username, password, email=None):
 def create_user(username, password, email):
     user = {'username': username,
             'password': bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()),
-            'email': email}
+            'email': email,
+            'aboutMe': '',
+            'profilePicture': None}
     return user
 
 
@@ -36,9 +38,9 @@ def create_user(username, password, email):
 def register_user():
     # parse args from request and verify that input is safe
     try:
-        username = request.args.get('user')
-        password = request.args.get('pwd')
-        email = request.args.get('email')
+        username = request.form['user']
+        password = request.form['pwd']
+        email = request.form['email']
         # validate against schema
         errors = schema_validator(username, password, email)
         assert(len(errors) is 0)
@@ -64,8 +66,8 @@ def register_user():
 def login_user():
     # parse args from request
     try:
-        username = request.args.get('user')
-        password = request.args.get('pwd')
+        username = request.form['user']
+        password = request.form['pwd']
         errors = schema_validator(username, password)
         assert(len(errors) is 0)
     except Exception as e:
