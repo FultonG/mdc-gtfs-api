@@ -13,7 +13,7 @@ def schema_validator(username, password, email=None):
     if email is not None:
         schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 100},
                 'password':{'type':'string','minlength':8, 'maxlength': 100},
-                'email': {'type': 'string'}}
+                'email': {'type': 'string', 'minlength':1}}
         input_info = {'username': username, 'password': password, 'email': email}
     else:
         schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 100},
@@ -36,11 +36,13 @@ def create_user(username, password, email):
 
 @users.route('/register', methods=['POST'])
 def register_user():
+    # pre defined list for errors
+    errors = []
     # parse args from request and verify that input is safe
     try:
-        username = request.form['user']
-        password = request.form['pwd']
-        email = request.form['email']
+        username = request.form.get('user', '')
+        password = request.form.get('pwd', '')
+        email = request.form.get('email', '')
         # validate against schema
         errors = schema_validator(username, password, email)
         assert(len(errors) is 0)
@@ -66,8 +68,8 @@ def register_user():
 def login_user():
     # parse args from request
     try:
-        username = request.form['user']
-        password = request.form['pwd']
+        username = request.form.get('user', '')
+        password = request.form.get('pwd', '')
         errors = schema_validator(username, password)
         assert(len(errors) is 0)
     except Exception as e:
