@@ -40,9 +40,10 @@ def register_user():
     errors = []
     # parse args from request and verify that input is safe
     try:
-        username = request.form.get('user', '')
-        password = request.form.get('pwd', '')
-        email = request.form.get('email', '')
+        data = request.get_json(force=True)
+        username = data['user']
+        password = data['pwd']
+        email = data['email']
         # validate against schema
         errors = schema_validator(username, password, email)
         assert(len(errors) is 0)
