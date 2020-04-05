@@ -8,6 +8,9 @@ from controllers.stops import stops
 from controllers.tokens import tokens
 from controllers.train import trains
 from controllers.stations import stations
+from controllers.trirail import trirail
+from controllers.trishape import trishape
+from controllers.tristops import tristops
 
 # enable cors for the flask instance
 CORS(app)
@@ -20,6 +23,9 @@ app.register_blueprint(stops)
 app.register_blueprint(tokens)
 app.register_blueprint(trains)
 app.register_blueprint(stations)
+app.register_blueprint(trirail)
+app.register_blueprint(trishape)
+app.register_blueprint(tristops)
 
 # default index route returns 200
 @app.route('/', methods=['GET'])
