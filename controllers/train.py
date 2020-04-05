@@ -64,13 +64,13 @@ def find_train():
     try:
         arrival = request.args.get('arrival')
         departure = request.args.get('departure')
-        departure_date = request.args.get('departure date')
+        departure_date = request.args.get('departureDate')
         # check if departure date is in proper format
         datetime.datetime.strptime(departure_date, '%Y-%M-%d')
         # validate arguments
         assert(schema_validator(arrival, departure, departure_date))
     except:
-        return make_response({'Error':'Missing or invalid input'}, 400)
+        return make_response({'Error':'Missing or invalid input'}, 500)
 
     try:
         # main api call, returns array

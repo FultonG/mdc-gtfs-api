@@ -20,7 +20,7 @@ def find_stops_by_id():
         route_id = request.args.get('id')
     except:
         # return error message and 400 if it throws an exeption
-        return make_response({'Error':'Missing or invalid input'}, 400)
+        return make_response({'Error':'Missing or invalid input'}, 500)
     # call enpoint with token and route
     try:
         result = requests.get(f'https://rest.tsoapi.com/PubTrans/GetModuleInfoPublic?key=route_stops&id={route_id}', verify=False)
@@ -36,7 +36,7 @@ def find_stops_by_id():
             all_stops.append([lat, lon])
     # raise error if exception
     except:
-        return make_response({'Error':'Data not found'}, 404)
+        return make_response({'Error':'Could not fetch data'}, 500)
     # return data_info
     return make_response(dumps(all_stops), 200)
 
