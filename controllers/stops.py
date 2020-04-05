@@ -23,23 +23,20 @@ def find_stops_by_id():
         return make_response({'Error':'Missing or invalid input'}, 400)
     # call enpoint with token and route
     try:
-        result = requests.get('https://rest.tsoapi.com/PubTrans/GetModuleInfoPublic?Key=ROUTE_STOPS_AND_UNITS&id={}&lan=en'.format(route_id), verify=False)
+        result = requests.get(f'https://rest.tsoapi.com/PubTrans/GetModuleInfoPublic?key=route_stops&id={route_id}', verify=False)
         # turn result into json
         result_json = result.json()
         data = json.loads(result_json)
-        # only usefull info in our data is in the 0 index
-        stops_data = data[0]
         # create variable to hold all the stops
         all_stops = []
         # loop over every dictionary in stops_data to get lat and lon
-        for stop_info in stops_data:
+        for stop_info in data:
             lat = float(stop_info['Latitude'])
             lon = float(stop_info['Longitude'])
             all_stops.append([lat, lon])
     # raise error if exception
-    except Exception as e:
-        print(e)
-        return make_response({}, 500)
+    except:
+        return make_response({'Error':'Data not found'}, 404)
     # return data_info
     return make_response(dumps(all_stops), 200)
 
