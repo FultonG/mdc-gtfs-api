@@ -4,6 +4,8 @@
 Postman docs can be found [here](https://documenter.getpostman.com/view/9923648/SWTHbaUZ?version=latest)
 
 Base heroku endpoint is [here](https://gtfs-mdc.herokuapp.com/)
+
+Docs with details of usage of 3rd party APIs and Difficulties can be found [here](https://docs.google.com/document/d/1LnjVfSM7SQJliW00DzduXWfyQZxJURXCTCUNCKX6ZKA/edit?usp=sharing)
 ### Initial Setup
 to install all of the dependencies run:
 
