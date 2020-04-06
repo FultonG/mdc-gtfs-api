@@ -69,8 +69,9 @@ def register_user():
 def login_user():
     # parse args from request
     try:
-        username = request.form.get('user', '')
-        password = request.form.get('pwd', '')
+        data = request.get_json(force=True)
+        username = data['user']
+        password = data['pwd']
         errors = schema_validator(username, password)
         assert(len(errors) is 0)
     except Exception as e:
