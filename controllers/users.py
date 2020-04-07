@@ -154,7 +154,7 @@ def update_info():
 def get_aboutme():
     # get passed in data
     try:
-        data = request.form
+        data = request.get_json(force=True)
         username = data['user']
         errors = schema_validator(username)
         assert(len(errors) is 0)
