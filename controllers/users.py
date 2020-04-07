@@ -39,11 +39,16 @@ def schema_validator(username, password=None, email=None, about_me=None):
 
 # method that creates a user with given params
 def create_user(username, password, email):
+    # encode default user image
+    with open('default_profile.png', 'rb') as img:
+        raw = img.read()
+        encoded = str(base64.b64encode(raw))[2:-1]
+
     user = {'username': username,
             'password': bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()),
             'email': email,
             'aboutMe': '',
-            'profilePicture': None}
+            'profilePicture': encoded}
     return user
 
 
@@ -115,7 +120,8 @@ def update_info():
         return make_response(jsonify({'Error': 'errors'}), 400)
     # check if user exists first
     try:
-        exists = (col.find_one({'username' : username}) is not None)
+        user_doc = col.find_one({'username' : username}, {'_id' : 0})
+        exists = (user_doc is not None)
     except Exception as e:
         print(e)
         return make_response(jsonify({'Error': 'Internal server error, please try again in a few minutes'}), 500)
@@ -135,23 +141,31 @@ def update_info():
             return make_response(jsonify({'Error': 'Missing file'}), 400)
         # check for valid file types
         elif extension == 'jpg' or extension == 'png':
-            # upload file to mongodb using gridfs
-            mongo.save_file('profile.' + extension, profile_pic)
+            filename = 'profile_' + username + '.' + extension
+            # upload file to mongodb using gridfs under the username
+            mongo.save_file(filename, profile_pic)
         else:
             return make_response(jsonify({'Error': 'Wrong file extension (only png and jpg allowed)'}), 400)
+    else:
+        # if no picture uploaded keep old filename
+        filename = user_doc['profilePicture']
     if text:
-        try:
-            # modify the user's document and update it to the text
-            about_me = data['aboutMe']
-            user_doc = col.update({'username' : username}, {'$set': {'aboutMe': about_me, 'profilePicture': filename}})
-        except Exception as e:
-            print(e)
-            return make_response(jsonify({'Error': 'Error updating user about me text'}), 500)
-    # if nothing else, return 200
+        # if user passed in text, use that to update the profile
+        about_me = data['aboutMe']
+    else:
+        # if no text is passed, keep old text
+        about_me = user_doc['aboutMe']
+
+    # if nothing else, update the info and return a 200
+    try:
+        col.update({'username' : username}, {'$set': {'aboutMe': about_me, 'profilePicture': filename}})
+    except Exception as e:
+        print(e)
+        return make_response(jsonify({'Error': 'Error updating user info'}), 500)
     return make_response(jsonify({'Success': True}), 200)
 
-@users.route('/about', methods=['GET'])
-def get_aboutme():
+@users.route('/profile', methods=['GET'])
+def user_data():
     # get passed in data
     try:
         data = request.get_json(force=True)
@@ -166,7 +180,7 @@ def get_aboutme():
         exists = (col.find_one({'username' : username}) is not None)
     except Exception as e:
         print(e)
-        return make_response(jsonify({'Error': 'Internal server error, please try again in a few minutes'}), 500)
+        return make_response(jsonify({'Error': 'Internal server error'}), 500)
     if not exists:
         return make_response(jsonify({'Error': 'User does not exist'}), 400)
     # get data and return it
@@ -174,11 +188,16 @@ def get_aboutme():
         user_doc = col.find_one({'username': username}, {'_id': 0, 'aboutMe': 1, 'profilePicture': 1})
     except Exception as e:
         print(e)
-        return make_response(jsonify({'Error': 'Internal server error, please try again in a few minutes'}), 500)
-    # return the data
-    extension = user_doc['profilePicture'][-3:]
-    picture = mongo.send_file('profile.' + extension)
-    picture.direct_passthrough = False
-    encoded = str(base64.b64encode(picture.data))[2:-1]
-    return make_response(jsonify({'aboutMe': user_doc['aboutMe'], 'profilePicture': encoded}), 200)
+        return make_response(jsonify({'Error': 'Internal server error'}), 500)
+    # check if user has default picture or not
+    default = ('profile' not in user_doc['profilePicture'])
+    if default:
+        user_profile_pic = user_doc['profilePicture']
+    else:
+        # return the data
+        filename = user_doc['profilePicture']
+        picture = mongo.send_file(filename)
+        picture.direct_passthrough = False
+        user_profile_pic = str(base64.b64encode(picture.data))[2:-1]
+    return make_response(jsonify({'aboutMe': user_doc['aboutMe'], 'profilePicture': user_profile_pic}), 200)
 
