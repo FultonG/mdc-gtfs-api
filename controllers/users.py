@@ -1,6 +1,5 @@
 import bcrypt
 import base64
-import gridfs
 from flask import Blueprint, request, make_response, jsonify
 from bson import ObjectId
 from cerberus import Validator
@@ -9,8 +8,6 @@ from .instances import mongo
 # init blueprint
 users = Blueprint('users', __name__)
 col = mongo.db.users
-# init gridFS driver
-fs = gridfs.GridFS(mongo.db)
 
 # init pymongo client to users collection
 def schema_validator(username, password=None, email=None, about_me=None):
