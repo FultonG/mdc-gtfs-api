@@ -83,7 +83,7 @@ def register_user():
         return make_response(jsonify({'success': True}), 200)
 
 
-@users.route('/login', methods=['GET'])
+@users.route('/login', methods=['POST'])
 def login_user():
     # parse args from request
     try:
@@ -164,7 +164,7 @@ def update_info():
         return make_response(jsonify({'Error': 'Error updating user info'}), 500)
     return make_response(jsonify({'Success': True}), 200)
 
-@users.route('/profile', methods=['GET'])
+@users.route('/profile', methods=['POST'])
 def user_data():
     # get passed in data
     try:
