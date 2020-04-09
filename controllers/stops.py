@@ -18,7 +18,8 @@ def find_stops_by_id():
     # parse id param from call
     try:
         route_id = request.args.get('id')
-    except:
+    except Exception as e:
+        print(e)
         # return error message and 400 if it throws an exeption
         return make_response({'Error':'Missing or invalid input'}, 400)
     # call enpoint with token and route
@@ -35,7 +36,8 @@ def find_stops_by_id():
             lon = float(stop_info['Longitude'])
             all_stops.append([lat, lon])
     # raise error if exception
-    except:
+    except Exception as e:
+        print(e)
         return make_response({'Error':'Could not fetch data'}, 400)
     # return data_info
     return make_response(dumps(all_stops), 200)

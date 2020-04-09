@@ -1,9 +1,9 @@
 from bson.json_util import dumps
 from flask import Blueprint, make_response, request
+from cerberus import Validator
 import requests
 import json
 import datetime
-from cerberus import Validator
 
 # create the blueprint (controller) for the trains
 trains = Blueprint('trains', __name__)
@@ -69,7 +69,8 @@ def find_train():
         datetime.datetime.strptime(departure_date, '%Y-%M-%d')
         # validate arguments
         assert(schema_validator(arrival, departure, departure_date))
-    except:
+    except Exception as e:
+        print(e)
         return make_response({'Error':'Missing or invalid input'}, 400)
 
     try:
@@ -86,7 +87,8 @@ def find_train():
         # pass each array element to method
         train_data = list(map(trip_info, data_json))
 
-    except:
+    except Exception as e:
+        print(e)
         return make_response({'Error':'Could not fetch data'}, 400)
     # since data is array dump it as string
     return make_response(json.dumps(train_data), 200)

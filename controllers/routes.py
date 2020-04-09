@@ -41,7 +41,8 @@ def show_all_routes():
                 del data[key]
         if not data:
             data = None
-    except:
+    except Exception as e:
+        print(e)
         return make_response({'Error': 'Could not fetch data'}, 400)
     # if nothing goes wrong return all of the data and return a 200
     if data:
@@ -59,7 +60,8 @@ def find_route_by_id():
         route_id = request.args.get('id')
         token_id = request.args.get('token')
         assert(schema_validator(token_id, route_id))
-    except:
+    except Exception as e:
+        print(e)
         # return error message and 400 if it throws an exeption
         return make_response({'Error': 'Missing or invalid input'}, 400)
     # query the routes collection and return whatever we find
@@ -67,7 +69,8 @@ def find_route_by_id():
         result = requests.get(f'https://rest.tsoapi.com/routes/getRouteFromToken?tkn={token_id}&routeId={route_id}', verify=False)
         result_json = result.json()
         data = json.loads(result_json)
-    except:
+    except Exception as e:
+        print(e)
         # return none and 500 if any errors happen
         return make_response({'Error':'Could not fetch data'}, 400)
     # return json results and send 200

@@ -1,9 +1,9 @@
 from bson.json_util import dumps
 from flask import Blueprint, make_response, request
+from cerberus import Validator
 import requests
 import json
 import polyline
-from cerberus import Validator
 
 shapes = Blueprint('shapes', __name__)
 
@@ -20,7 +20,8 @@ def find_shape_by_id():
         route_id = request.args.get('id')
         token_id = request.args.get('token')
         assert(schema_validator(token_id, route_id))
-    except:
+    except Exception as e:
+        print(e)
         # return error message and 400 if it throws an exeption
         return make_response({'Error':'Missing or invalid input'}, 400)
     # call enpoint with token and route
@@ -34,7 +35,8 @@ def find_shape_by_id():
         # store the info we want to return in seperate variable
         data_info = {'Names':route_data['Name1'], 'RouteId':route_data['RouteId'], 'LineColor':route_data['LineColor'], 'RoutePath':polyline.decode(route_data['RoutePath'])}
     # raise error if exception
-    except:
+    except Exception as e:
+        print(e)
         return make_response({'Error':'Could not fetch data'}, 400)
     # return data_info
     return make_response(dumps(data_info), 200)
