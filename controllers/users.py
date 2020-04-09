@@ -193,11 +193,10 @@ def update_info(user):
     return make_response(jsonify({'Success': True}), 200)
 
 @users.route('/profile', methods=['GET'])
-@validate
-def user_data(user):
+def user_data():
     # get passed in data
     try:
-        username = user
+        username = request.args.get('user')
         errors = schema_validator(username)
         assert(len(errors) is 0)
     except Exception as e:
