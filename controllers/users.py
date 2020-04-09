@@ -20,7 +20,7 @@ def schema_validator(username, password=None, email=None, about_me=None, address
                 'password':{'type':'string','minlength':8, 'maxlength': 100},
                 'email': {'type': 'string', 'minlength':1},
                 'address': {'type': 'string', 'minlength': 0, 'maxlength': 50}}
-        input_info = {'username': username, 'password': password, 'email': email, 'address', address}
+        input_info = {'username': username, 'password': password, 'email': email, 'address': address}
     # login
     elif password is not None and email is None:
         schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 100},
