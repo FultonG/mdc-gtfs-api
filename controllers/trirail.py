@@ -25,7 +25,8 @@ def find_trirail_all():
             route['color'] = '#'+route['color']
             # delete useless info
             del route['type']
-    except:
+    except Exception as e:
+        print(e)
         return make_response({'Error':'Could not fetch data'}, 400)
     return make_response(json.dumps(data), 200)
 
@@ -34,20 +35,22 @@ def find_trirail():
     try:
         route = request.args.get('id')
         assert(schema_validator(route))
-    except:
+    except Exception as e:
+        print(e)
         return make_response({'Error':'Missing or invalid input'}, 400)
 
     try:
-        # main api call, returns array
+        # main api call
         result = requests.get(f'https://transitime-api.goswift.ly/api/v1/key/81YENWXv/agency/trirail/command/routes?format=json&r={route}')
-        # turn request object into text
+        # turn request object into json
         result_json = result.json()
         data = result_json.get('routes', ' ')[0]
         # add '#' to color string to make frontend happy
         data['color'] = '#'+data['color']
         # delete useless info
         del data['type']
-    except:
+    except Exception as e:
+        print(e)
         return make_response({'Error':'Could not fetch data'}, 400)
     # since data is array dump it as string
     return make_response(json.dumps(data), 200)

@@ -1,8 +1,8 @@
 from bson.json_util import dumps
 from flask import Blueprint, make_response, request
+from cerberus import Validator
 import requests
 import json
-from cerberus import Validator
 
 # create the blueprint (controller) for the trains
 trishape = Blueprint('trishape', __name__)
@@ -29,7 +29,8 @@ def find_trishape():
     try:
         route = request.args.get('id')
         assert(schema_validator(route))
-    except:
+    except Exception as e:
+        print(e)
         return make_response({'Error':'Missing or invalid input'}, 400)
 
     try:
@@ -46,7 +47,8 @@ def find_trishape():
             info = get_coords(stops)
             # add all coords of trip
             coords += info
-    except:
+    except Exception as e:
+        print(e)
         return make_response({'Error':'Could not fetch data'}, 400)
     # since data is array dump it as string
     return make_response(json.dumps(coords), 200)
