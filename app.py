@@ -13,6 +13,10 @@ from controllers.trishape import trishape
 from controllers.tristops import tristops
 from controllers.trolley import trolley
 from controllers.trostops import trostops
+from controllers.mdroutes import mdroutes
+from controllers.mdbus import mdbus
+from controllers.mdshapeid import mdshapeid
+from controllers.mdshape import mdshape
 
 # enable cors for the flask instance
 CORS(app)
@@ -30,6 +34,10 @@ app.register_blueprint(trishape)
 app.register_blueprint(tristops)
 app.register_blueprint(trolley)
 app.register_blueprint(trostops)
+app.register_blueprint(mdroutes)
+app.register_blueprint(mdbus)
+app.register_blueprint(mdshapeid)
+app.register_blueprint(mdshape)
 
 # default index route returns 200
 @app.route('/', methods=['GET'])
