@@ -1,37 +1,82 @@
+import bcrypt
+import base64
+import jwt
+import datetime
 from flask import Blueprint, request, make_response, jsonify
 from bson import ObjectId
 from cerberus import Validator
-from .instances import mongo
-import bcrypt
+from .instances import mongo, app
+from functools import wraps
 
 # init blueprint
 users = Blueprint('users', __name__)
 col = mongo.db.users
 
 # init pymongo client to users collection
-def schema_validator(username, password, email=None):
-    if email is not None:
+def schema_validator(username, password=None, email=None, about_me=None, address=None):
+    # registration
+    if email is not None and address is not None:
         schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 100},
                 'password':{'type':'string','minlength':8, 'maxlength': 100},
-                'email': {'type': 'string', 'minlength':1}}
-        input_info = {'username': username, 'password': password, 'email': email}
-    else:
+                'email': {'type': 'string', 'minlength':1},
+                'address': {'type': 'string', 'minlength': 0, 'maxlength': 50}}
+        input_info = {'username': username, 'password': password, 'email': email, 'address': address}
+    # login
+    elif password is not None and email is None:
         schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 100},
                 'password':{'type':'string','minlength':8, 'maxlength': 100}}
         input_info = {'username': username, 'password': password}
+    # about me
+    elif about_me is not None and username is not None:
+        schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 100},
+                'about_me':{'type':'string','minlength':0, 'maxlength': 500}}
+        input_info = {'username': username, 'about_me': password}
+    # just username
+    else:
+        schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 100}}
+        input_info = {'username': username}
+
 
     v = Validator(schema)
     v.validate(input_info)
     return v.errors
 
 # method that creates a user with given params
-def create_user(username, password, email):
+def create_user(username, password, email, address):
+    # encode default user image
+    with open('default_profile.png', 'rb') as img:
+        raw = img.read()
+        encoded = str(base64.b64encode(raw))[2:-1]
+
     user = {'username': username,
             'password': bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()),
             'email': email,
+            'address': address,
             'aboutMe': '',
-            'profilePicture': None}
+            'profilePicture': encoded}
     return user
+
+# validates the JWT token passed in
+def validate(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # check for the token in headers and validate it
+        token = None
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(' ')[1]
+
+        if token is None:
+            return jsonify({'Error': 'Missing token'}), 401
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            user = data['user']
+        except Exception as e:
+            print(e)
+            return jsonify({'Error': 'Token is invalid'}), 403
+
+        return f(user, *args, **kwargs)
+    return decorated
 
 
 @users.route('/register', methods=['POST'])
@@ -44,8 +89,9 @@ def register_user():
         username = data['user']
         password = data['pwd']
         email = data['email']
+        address = data['address']
         # validate against schema
-        errors = schema_validator(username, password, email)
+        errors = schema_validator(username, password, email, address=address)
         assert(len(errors) is 0)
     except Exception as e:
         print('exception:', e)
@@ -60,7 +106,7 @@ def register_user():
         return make_response({'Error': 'User already exists'}, 406)
     else:
         # make user and insert to db
-        user = create_user(username, password, email)
+        user = create_user(username, password, email, address)
         col.insert_one(user)
         return make_response(jsonify({'success': True}), 200)
 
@@ -69,8 +115,9 @@ def register_user():
 def login_user():
     # parse args from request
     try:
-        username = request.form.get('user', '')
-        password = request.form.get('pwd', '')
+        auth = request.authorization
+        username = auth.username
+        password = auth.password
         errors = schema_validator(username, password)
         assert(len(errors) is 0)
     except Exception as e:
@@ -80,10 +127,110 @@ def login_user():
     user = col.find_one({'username': username}, {'_id': 0, 'password': 1})
     # return 400 if user doesnt exist
     if (user is None):
-        return make_response(jsonify({'error': 'User not found'}), 404)
+        return make_response(jsonify({'Error': 'User not found'}), 404)
     # hash pwd and compare
     match = bcrypt.checkpw(password.encode('utf-8'), user['password'])
     if match:
-        return make_response(jsonify({'success': True}),200)
+        # make token here
+        token = jwt.encode({'user': username,'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=45)}, app.config['SECRET_KEY'])
+        return make_response(jsonify({'token': token.decode('UTF-8'), 'success': True}),200)
     else:
         return make_response(jsonify({'success': False, 'error': 'Incorrect password'}),400)
+
+@users.route('/update', methods=['PATCH'])
+@validate
+def update_info(user):
+    try:
+        data = request.form
+        username = user
+        errors = schema_validator(username)
+        assert(len(errors) is 0)
+    except Exception as e:
+        # no data passed
+        print(e)
+        return make_response(jsonify({'Error': 'errors'}), 400)
+    # check if user exists first
+    try:
+        user_doc = col.find_one({'username' : username}, {'_id' : 0})
+        exists = (user_doc is not None)
+    except Exception as e:
+        print(e)
+        return make_response(jsonify({'Error': 'Internal server error, please try again in a few minutes'}), 500)
+    if not exists:
+        return make_response(jsonify({'Error': 'User does not exist'}), 400)
+
+    # try to get image here if one was provided
+    picture = 'file' in request.files
+    text = data.get('aboutMe') is not None and len(data.get('aboutMe')) is not 0
+
+    if picture:
+        # upload picture to db under the user's document
+        profile_pic = request.files['file']
+        filename = profile_pic.filename
+        extension = filename[-3:]
+        if filename == '':
+            return make_response(jsonify({'Error': 'Missing file'}), 400)
+        # check for valid file types
+        elif extension == 'jpg' or extension == 'png':
+            filename = 'profile_' + username + '.' + extension
+            # upload file to mongodb using gridfs under the username
+            mongo.save_file(filename, profile_pic)
+        else:
+            return make_response(jsonify({'Error': 'Wrong file extension (only png and jpg allowed)'}), 400)
+    else:
+        # if no picture uploaded keep old filename
+        filename = user_doc['profilePicture']
+    if text:
+        # if user passed in text, use that to update the profile
+        about_me = data['aboutMe']
+    else:
+        # if no text is passed, keep old text
+        about_me = user_doc['aboutMe']
+
+    # if nothing else, update the info and return a 200
+    try:
+        col.update({'username' : username}, {'$set': {'aboutMe': about_me, 'profilePicture': filename}})
+    except Exception as e:
+        print(e)
+        return make_response(jsonify({'Error': 'Error updating user info'}), 500)
+    return make_response(jsonify({'Success': True}), 200)
+
+@users.route('/profile', methods=['GET'])
+def user_data():
+    # get passed in data
+    try:
+        username = request.args.get('user')
+        errors = schema_validator(username)
+        assert(len(errors) is 0)
+    except Exception as e:
+        print(e)
+        return make_response(jsonify({'Error': errors}), 400)
+    # check if user exists
+    try:
+        exists = (col.find_one({'username' : username}) is not None)
+    except Exception as e:
+        print(e)
+        return make_response(jsonify({'Error': 'Internal server error'}), 500)
+    if not exists:
+        return make_response(jsonify({'Error': 'User does not exist'}), 400)
+    # get data and return it
+    try:
+        user_doc = col.find_one({'username': username},
+                {'_id': 0, 'aboutMe': 1, 'profilePicture': 1, 'address': 1, 'email': 1})
+    except Exception as e:
+        print(e)
+        return make_response(jsonify({'Error': 'Internal server error'}), 500)
+    # check if user has default picture or not
+    default = ('profile' not in user_doc['profilePicture'])
+    if default:
+        user_profile_pic = user_doc['profilePicture']
+    else:
+        # return the data
+        filename = user_doc['profilePicture']
+        address = user_doc['address']
+        email = user_doc['email']
+        picture = mongo.send_file(filename)
+        picture.direct_passthrough = False
+        user_profile_pic = str(base64.b64encode(picture.data))[2:-1]
+    return make_response(jsonify({'aboutMe': user_doc['aboutMe'],
+        'profilePicture': user_profile_pic, 'address': address, 'email': email}), 200)

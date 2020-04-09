@@ -47,7 +47,8 @@ def find_trolley():
     try:
         route = request.args.get('id')
         assert(schema_validator(route))
-    except:
+    except Exception as e:
+        print(e)
         return make_response({'Error':'Missing or invalid input'}, 400)
 
     try:
