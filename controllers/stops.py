@@ -32,9 +32,13 @@ def find_stops_by_id():
         all_stops = []
         # loop over every dictionary in stops_data to get lat and lon
         for stop_info in data:
+            info = {}
             lat = float(stop_info['Latitude'])
             lon = float(stop_info['Longitude'])
-            all_stops.append([lat, lon])
+            info['Shape'] = [lat, lon]
+            info['Street'] = stop_info['Street']
+            info['StopName'] = stop_info['StopName']
+            all_stops.append(info)
     # raise error if exception
     except Exception as e:
         print(e)
