@@ -23,7 +23,6 @@ def show_all_mdtrain():
         # keys we want
         keys = ['TrainID','LineID','Coords','ServiceDirection','Service','LocationUpdated']
         data = []
-        print(root.findall('Record'))
         # iterate over all records in root
         for train in root.findall('Record'):
             info = {}
