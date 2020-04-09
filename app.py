@@ -17,6 +17,10 @@ from controllers.mdroutes import mdroutes
 from controllers.mdbus import mdbus
 from controllers.mdshapeid import mdshapeid
 from controllers.mdshape import mdshape
+from controllers.mdtrain import mdtrain
+from controllers.mdstations import mdstations
+from controllers.mdtrainshape import mdtrainshape
+from controllers.mdtraintracker import mdtraintracker
 
 # enable cors for the flask instance
 CORS(app)
@@ -38,6 +42,10 @@ app.register_blueprint(mdroutes)
 app.register_blueprint(mdbus)
 app.register_blueprint(mdshapeid)
 app.register_blueprint(mdshape)
+app.register_blueprint(mdtrain)
+app.register_blueprint(mdstations)
+app.register_blueprint(mdtrainshape)
+app.register_blueprint(mdtraintracker)
 
 # default index route returns 200
 @app.route('/', methods=['GET'])
