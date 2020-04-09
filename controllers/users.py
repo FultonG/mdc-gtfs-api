@@ -227,10 +227,11 @@ def user_data():
     else:
         # return the data
         filename = user_doc['profilePicture']
-        address = user_doc['address']
-        email = user_doc['email']
         picture = mongo.send_file(filename)
         picture.direct_passthrough = False
         user_profile_pic = str(base64.b64encode(picture.data))[2:-1]
+    # prepare to return all of the other data
+    address = user_doc['address']
+    email = user_doc['email']
     return make_response(jsonify({'aboutMe': user_doc['aboutMe'],
         'profilePicture': user_profile_pic, 'address': address, 'email': email}), 200)
