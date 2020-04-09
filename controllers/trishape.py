@@ -47,7 +47,7 @@ def find_trishape():
             # add all coords of trip
             coords += info
     except:
-        return make_response({'Error':'Could not fetch data'}, 404)
+        return make_response({'Error':'Could not fetch data'}, 400)
     # since data is array dump it as string
     return make_response(json.dumps(coords), 200)
 

@@ -64,7 +64,7 @@ def find_train():
     try:
         arrival = request.args.get('arrival')
         departure = request.args.get('departure')
-        departure_date = request.args.get('departure date')
+        departure_date = request.args.get('departureDate')
         # check if departure date is in proper format
         datetime.datetime.strptime(departure_date, '%Y-%M-%d')
         # validate arguments
@@ -87,7 +87,7 @@ def find_train():
         train_data = list(map(trip_info, data_json))
 
     except:
-        return make_response({'Error':'Could not fetch data'}, 500)
+        return make_response({'Error':'Could not fetch data'}, 400)
     # since data is array dump it as string
     return make_response(json.dumps(train_data), 200)
 

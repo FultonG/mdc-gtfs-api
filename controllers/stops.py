@@ -36,7 +36,7 @@ def find_stops_by_id():
             all_stops.append([lat, lon])
     # raise error if exception
     except:
-        return make_response({'Error':'Data not found'}, 404)
+        return make_response({'Error':'Could not fetch data'}, 400)
     # return data_info
     return make_response(dumps(all_stops), 200)
 

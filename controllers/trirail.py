@@ -26,7 +26,7 @@ def find_trirail_all():
             # delete useless info
             del route['type']
     except:
-        return make_response({'Error':'Could not load data'}, 404)
+        return make_response({'Error':'Could not fetch data'}, 400)
     return make_response(json.dumps(data), 200)
 
 @trirail.route('/trirail/find', methods=['GET'])
@@ -35,7 +35,7 @@ def find_trirail():
         route = request.args.get('id')
         assert(schema_validator(route))
     except:
-        return make_response({'Error':'Missing or invalid input'}, 404)
+        return make_response({'Error':'Missing or invalid input'}, 400)
 
     try:
         # main api call, returns array
@@ -48,7 +48,7 @@ def find_trirail():
         # delete useless info
         del data['type']
     except:
-        return make_response({'Error':'Could not fetch data'}, 404)
+        return make_response({'Error':'Could not fetch data'}, 400)
     # since data is array dump it as string
     return make_response(json.dumps(data), 200)
 

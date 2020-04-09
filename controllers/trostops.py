@@ -1,21 +1,21 @@
 from bson.json_util import dumps
 from flask import Blueprint, make_response, request
+from cerberus import Validator
 import requests
 import json
-from cerberus import Validator
+import polyline
 
-# create the blueprint (controller) for the trains
-tristops = Blueprint('tristops', __name__)
+trostops = Blueprint('trostops', __name__)
 
 # schema validator
 def schema_validator(route):
-    schema = {'route':{'type':'string', 'maxlength':2}}
+    schema = {'route':{'type':'string', 'maxlength':1}}
     v = Validator(schema)
     info = {'route':route}
     return v.validate(info)
 
-@tristops.route('/tristops/find', methods=['GET'])
-def find_tristops():
+@trostops.route('/trostops/find', methods=['GET'])
+def find_trostops():
     try:
         route = request.args.get('id')
         assert(schema_validator(route))
@@ -24,23 +24,21 @@ def find_tristops():
 
     try:
         # main api call, returns array
-        result = requests.get(f'https://transitime-api.goswift.ly/api/v1/key/81YENWXv/agency/trirail/command/stops?format=json&r={route}')
-        # turn request object into text
+        result = requests.get(f'http://cgpublic.etaspot.net/service.php?service=get_stops&routeID={route}&token=TESTING', verify=False)
         result_json = result.json()
-        # data we want is only in first index
-        directions = result_json.get('directions', ' ')[0]
-        # stop key that holds all stops as value
-        stops = directions.get('stops', ' ')
+        stops = result_json.get('get_stops', ' ')
         data = []
         for stop in stops:
             info = {}
             lat = stop.get('lat', '')
-            lon = stop.get('lon', '')
-            info['name'] = stop.get('name', '')
+            lon = stop.get('lng', '')
             info['shape'] = [lat, lon]
+            info['address'] = stop.get('name', '')
             data.append(info)
-    except:
+    except Exception as e:
+        print(e)
         return make_response({'Error':'Could not fetch data'}, 400)
     # since data is array dump it as string
     return make_response(json.dumps(data), 200)
+
 

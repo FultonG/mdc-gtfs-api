@@ -24,15 +24,15 @@ def schema_validator(token=None, route=None):
 def show_all_routes():
     try:
         # equivalent to db.routes.find({})
-        token_id = request.args.get('token')
+        token_id = request.args.get('tkn')
         assert(schema_validator(token_id))
     except Exception as e:
         print(e)
         # if there's an error, return a 500 and no data
-        return make_response({}, 500)
+        return make_response({'Error':'Missing or invalid input'}, 400)
 
     try:
-        result = requests.get('https://rest.tsoapi.com/routes/getRouteFromToken?tkn={}&routeId=-1'.format(token_id), verify=False)
+        result = requests.get(f'https://rest.tsoapi.com/routes/getRouteFromToken?tkn={token_id}&routeId=-1', verify=False)
         result_json = result.json()
         data = json.loads(result_json)
         data_keys = ['routes', 'points', 'stops']
@@ -42,7 +42,7 @@ def show_all_routes():
         if not data:
             data = None
     except:
-        return make_response({'error': 'Server error'}, 500)
+        return make_response({'Error': 'Could not fetch data'}, 400)
     # if nothing goes wrong return all of the data and return a 200
     if data:
         # decode polyline info in routes
@@ -69,6 +69,6 @@ def find_route_by_id():
         data = json.loads(result_json)
     except:
         # return none and 500 if any errors happen
-        return make_response({}, 500)
+        return make_response({'Error':'Could not fetch data'}, 400)
     # return json results and send 200
     return make_response(data, 200)
