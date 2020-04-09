@@ -108,7 +108,7 @@ def register_user():
         return make_response(jsonify({'success': True}), 200)
 
 
-@users.route('/login', methods=['POST'])
+@users.route('/login', methods=['GET'])
 def login_user():
     # parse args from request
     try:
