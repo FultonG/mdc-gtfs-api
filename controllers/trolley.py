@@ -34,7 +34,7 @@ def find_trolley_all():
             data.append(info)
     except Exception as e:
         print(e)
-        return make_response({'Error':'Could not fetch data'}, 500)
+        return make_response({'Error':'Could not fetch data'}, 400)
     return make_response(json.dumps(data), 200)
 
 @trolley.route('/trolley/find', methods=['GET'])
@@ -43,7 +43,7 @@ def find_trolley():
         route = request.args.get('id')
         assert(schema_validator(route))
     except:
-        return make_response({'Error':'Missing or invalid input'}, 500)
+        return make_response({'Error':'Missing or invalid input'}, 400)
 
     try:
         # main api call, returns array
@@ -61,7 +61,7 @@ def find_trolley():
         route = info
     except Exception as e:
         print(e)
-        return make_response({'Error':'Could not fetch data'}, 500)
+        return make_response({'Error':'Could not fetch data'}, 400)
     # since data is array dump it as string
     return make_response(json.dumps(route), 200)
 

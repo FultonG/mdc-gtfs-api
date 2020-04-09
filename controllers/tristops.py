@@ -20,7 +20,7 @@ def find_tristops():
         route = request.args.get('id')
         assert(schema_validator(route))
     except:
-        return make_response({'Error':'Missing or invalid input'}, 500)
+        return make_response({'Error':'Missing or invalid input'}, 400)
 
     try:
         # main api call, returns array
@@ -40,7 +40,7 @@ def find_tristops():
             info['shape'] = [lat, lon]
             data.append(info)
     except:
-        return make_response({'Error':'Could not fetch data'}, 500)
+        return make_response({'Error':'Could not fetch data'}, 400)
     # since data is array dump it as string
     return make_response(json.dumps(data), 200)
 

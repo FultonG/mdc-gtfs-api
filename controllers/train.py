@@ -70,7 +70,7 @@ def find_train():
         # validate arguments
         assert(schema_validator(arrival, departure, departure_date))
     except:
-        return make_response({'Error':'Missing or invalid input'}, 500)
+        return make_response({'Error':'Missing or invalid input'}, 400)
 
     try:
         # main api call, returns array
@@ -87,7 +87,7 @@ def find_train():
         train_data = list(map(trip_info, data_json))
 
     except:
-        return make_response({'Error':'Could not fetch data'}, 500)
+        return make_response({'Error':'Could not fetch data'}, 400)
     # since data is array dump it as string
     return make_response(json.dumps(train_data), 200)
 
