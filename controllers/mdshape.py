@@ -5,7 +5,7 @@ from cerberus import Validator
 import requests
 import json
 # create the blueprint (controller) for the routes
-mdshape = Blueprint('shape', __name__)
+mdshape = Blueprint('mdshape', __name__)
 
 def schema_validator(shape_id):
     schema = {'shape':{'type':'string','maxlength':6}}
