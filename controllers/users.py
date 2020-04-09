@@ -13,13 +13,14 @@ users = Blueprint('users', __name__)
 col = mongo.db.users
 
 # init pymongo client to users collection
-def schema_validator(username, password=None, email=None, about_me=None):
+def schema_validator(username, password=None, email=None, about_me=None, address=None):
     # registration
-    if email is not None:
+    if email is not None and address is not None:
         schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 100},
                 'password':{'type':'string','minlength':8, 'maxlength': 100},
-                'email': {'type': 'string', 'minlength':1}}
-        input_info = {'username': username, 'password': password, 'email': email}
+                'email': {'type': 'string', 'minlength':1},
+                'address': {'type': 'string', 'minlength': 0, 'maxlength': 50}}
+        input_info = {'username': username, 'password': password, 'email': email, 'address', address}
     # login
     elif password is not None and email is None:
         schema = {'username':{'type':'string', 'minlength':6, 'maxlength': 100},
@@ -41,7 +42,7 @@ def schema_validator(username, password=None, email=None, about_me=None):
     return v.errors
 
 # method that creates a user with given params
-def create_user(username, password, email):
+def create_user(username, password, email, address):
     # encode default user image
     with open('default_profile.png', 'rb') as img:
         raw = img.read()
@@ -50,6 +51,7 @@ def create_user(username, password, email):
     user = {'username': username,
             'password': bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()),
             'email': email,
+            'address': address,
             'aboutMe': '',
             'profilePicture': encoded}
     return user
@@ -87,8 +89,9 @@ def register_user():
         username = data['user']
         password = data['pwd']
         email = data['email']
+        address = data['address']
         # validate against schema
-        errors = schema_validator(username, password, email)
+        errors = schema_validator(username, password, email, address=address)
         assert(len(errors) is 0)
     except Exception as e:
         print('exception:', e)
@@ -103,7 +106,7 @@ def register_user():
         return make_response({'Error': 'User already exists'}, 406)
     else:
         # make user and insert to db
-        user = create_user(username, password, email)
+        user = create_user(username, password, email, address)
         col.insert_one(user)
         return make_response(jsonify({'success': True}), 200)
 
@@ -212,7 +215,8 @@ def user_data():
         return make_response(jsonify({'Error': 'User does not exist'}), 400)
     # get data and return it
     try:
-        user_doc = col.find_one({'username': username}, {'_id': 0, 'aboutMe': 1, 'profilePicture': 1})
+        user_doc = col.find_one({'username': username},
+                {'_id': 0, 'aboutMe': 1, 'profilePicture': 1, 'address': 1, 'email': 1})
     except Exception as e:
         print(e)
         return make_response(jsonify({'Error': 'Internal server error'}), 500)
@@ -223,8 +227,10 @@ def user_data():
     else:
         # return the data
         filename = user_doc['profilePicture']
+        address = user_doc['address']
+        email = user_doc['email']
         picture = mongo.send_file(filename)
         picture.direct_passthrough = False
         user_profile_pic = str(base64.b64encode(picture.data))[2:-1]
-    return make_response(jsonify({'aboutMe': user_doc['aboutMe'], 'profilePicture': user_profile_pic}), 200)
-
+    return make_response(jsonify({'aboutMe': user_doc['aboutMe'],
+        'profilePicture': user_profile_pic, 'address': address, 'email': email}), 200)
