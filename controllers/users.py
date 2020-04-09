@@ -66,14 +66,14 @@ def validate(f):
             token = request.headers['Authorization'].split(' ')[1]
 
         if token is None:
-            return jsonify({'Error': 'Missing token'}), 401
+            return make_response(jsonify({'Error': 'Missing token'}), 401)
 
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'])
             user = data['user']
         except Exception as e:
             print(e)
-            return jsonify({'Error': 'Token is invalid'}), 403
+            return make_response(jsonify({'Error': 'Token is invalid or has timed out'}), 403)
 
         return f(user, *args, **kwargs)
     return decorated
@@ -132,7 +132,7 @@ def login_user():
     match = bcrypt.checkpw(password.encode('utf-8'), user['password'])
     if match:
         # make token here
-        token = jwt.encode({'user': username,'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=45)}, app.config['SECRET_KEY'])
+        token = jwt.encode({'user': username,'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)}, app.config['SECRET_KEY'])
         return make_response(jsonify({'token': token.decode('UTF-8'), 'success': True}),200)
     else:
         return make_response(jsonify({'success': False, 'error': 'Incorrect password'}),400)
