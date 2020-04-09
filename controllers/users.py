@@ -1,9 +1,12 @@
 import bcrypt
 import base64
+import jwt
+import datetime
 from flask import Blueprint, request, make_response, jsonify
 from bson import ObjectId
 from cerberus import Validator
-from .instances import mongo
+from .instances import mongo, app
+from functools import wraps
 
 # init blueprint
 users = Blueprint('users', __name__)
@@ -51,6 +54,28 @@ def create_user(username, password, email):
             'profilePicture': encoded}
     return user
 
+# validates the JWT token passed in
+def validate(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # check for the token in headers and validate it
+        token = None
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(' ')[1]
+
+        if token is None:
+            return jsonify({'Error': 'Missing token'}), 401
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            user = data['user']
+        except Exception as e:
+            print(e)
+            return jsonify({'Error': 'Token is invalid'}), 403
+
+        return f(user, *args, **kwargs)
+    return decorated
+
 
 @users.route('/register', methods=['POST'])
 def register_user():
@@ -87,9 +112,9 @@ def register_user():
 def login_user():
     # parse args from request
     try:
-        data = request.get_json(force=True)
-        username = data['user']
-        password = data['pwd']
+        auth = request.authorization
+        username = auth.password
+        password = auth.username
         errors = schema_validator(username, password)
         assert(len(errors) is 0)
     except Exception as e:
@@ -103,15 +128,18 @@ def login_user():
     # hash pwd and compare
     match = bcrypt.checkpw(password.encode('utf-8'), user['password'])
     if match:
-        return make_response(jsonify({'success': True}),200)
+        # make token here
+        token = jwt.encode({'user': username,'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=45)}, app.config['SECRET_KEY'])
+        return make_response(jsonify({'token': token.decode('UTF-8'), 'success': True}),200)
     else:
         return make_response(jsonify({'success': False, 'error': 'Incorrect password'}),400)
 
 @users.route('/update', methods=['PATCH'])
-def update_info():
+@validate
+def update_info(user):
     try:
         data = request.form
-        username = data['user']
+        username = user
         errors = schema_validator(username)
         assert(len(errors) is 0)
     except Exception as e:
@@ -165,11 +193,12 @@ def update_info():
     return make_response(jsonify({'Success': True}), 200)
 
 @users.route('/profile', methods=['POST'])
-def user_data():
+@validate
+def user_data(user):
     # get passed in data
     try:
         data = request.get_json(force=True)
-        username = data['user']
+        username = user
         errors = schema_validator(username)
         assert(len(errors) is 0)
     except Exception as e:
