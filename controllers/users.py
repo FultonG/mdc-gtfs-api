@@ -113,8 +113,8 @@ def login_user():
     # parse args from request
     try:
         auth = request.authorization
-        username = auth.password
-        password = auth.username
+        username = auth.username
+        password = auth.password
         errors = schema_validator(username, password)
         assert(len(errors) is 0)
     except Exception as e:
