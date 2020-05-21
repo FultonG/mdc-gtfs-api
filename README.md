@@ -1,7 +1,8 @@
 # GTFS API
 
 ## Resources
-Postman docs can be found [here](https://documenter.getpostman.com/view/9923648/SWTHbaUZ?version=latest)
+Postman docs can be found [here](https://documenter.getpostman.com/view/9923648/SzRw2BVr?version=latest)
+
 
 Base heroku endpoint is [here](https://gtfs-mdc.herokuapp.com/)
 
